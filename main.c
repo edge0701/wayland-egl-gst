@@ -124,8 +124,12 @@ error_cb(GstBus *bus, GstMessage *msg, gpointer user_data) {
 static GstBusSyncReply
 bus_sync_handler(GstBus *bus, GstMessage *message, gpointer user_data) {
 	App *d = user_data;
+    const gchar *type = NULL;
 
-	printf("bussync\n");
+    g_return_val_if_fail (GST_IS_MESSAGE (message), FALSE);
+
+    if (GST_MESSAGE_TYPE (message) == GST_MESSAGE_NEED_CONTEXT && gst_message_parse_context_type (message, &type))
+        printf("bussync type: %s\n", type);
 
 	if (gst_is_wayland_display_handle_need_context_message(message)) {
 		GstContext *context;
@@ -143,6 +147,8 @@ bus_sync_handler(GstBus *bus, GstMessage *message, gpointer user_data) {
 		//GtkAllocation allocation;
 		//GdkWindow *window;
 		//struct wl_surface *window_handle;
+
+        printf("video overlay\n");
 
 		/* GST_MESSAGE_SRC (message) will be the overlay object that we have to
          * use. This may be waylandsink, but it may also be playbin. In the latter
