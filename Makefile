@@ -1,5 +1,5 @@
 CC=gcc
-PKGCONFIG=`pkg-config --cflags --libs gstreamer-1.0 gstreamer-plugins-bad-1.0 gstreamer-video-1.0 wayland-client wayland-egl egl`
+PKGCONFIG=`pkg-config --cflags --libs gstreamer-1.0 gstreamer-plugins-bad-1.0 gstreamer-video-1.0 wayland-client wayland-egl egl gl`
 FLAGS=-lgstwayland-1.0 $(PKGCONFIG)
 
 debug:clean
