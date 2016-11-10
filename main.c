@@ -1,9 +1,9 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
-#include <EGL/egl.h>
-#include <GL/gl.h>
+#include <GLES3/gl3.h>
 #include <string.h>
 #include <wayland-egl.h>
+#include <EGL/egl.h>
 #include <wayland-client.h>
 
 #define WIDTH 512
@@ -27,7 +27,7 @@ typedef struct {
 	GstVideoOverlay *overlay;
 	gchar **argv;
 	gint current_uri;
-} Window;
+} App;
 
 // listeners
 static void registry_add_object (void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version) {
@@ -47,7 +47,7 @@ static void shell_surface_ping (void *data, struct wl_shell_surface *shell_surfa
 	wl_shell_surface_pong (shell_surface, serial);
 }
 static void shell_surface_configure (void *data, struct wl_shell_surface *shell_surface, uint32_t edges, int32_t width, int32_t height) {
-	Window *window = data;
+	App *window = data;
 	wl_egl_window_resize (window->egl_window, width, height, 0, 0);
 }
 static void shell_surface_popup_done (void *data, struct wl_shell_surface *shell_surface) {
@@ -55,7 +55,7 @@ static void shell_surface_popup_done (void *data, struct wl_shell_surface *shell
 }
 static struct wl_shell_surface_listener shell_surface_listener = {&shell_surface_ping, &shell_surface_configure, &shell_surface_popup_done};
 
-static void create_window (Window *window, int32_t width, int32_t height) {
+static void create_window (App *window, int32_t width, int32_t height) {
 	eglBindAPI (EGL_OPENGL_API);
 	EGLint attributes[] = {
 		EGL_RED_SIZE, 8,
@@ -75,14 +75,14 @@ static void create_window (Window *window, int32_t width, int32_t height) {
 	window->egl_surface = eglCreateWindowSurface (egl_display, config, window->egl_window, NULL);
 	eglMakeCurrent (egl_display, window->egl_surface, window->egl_surface, window->egl_context);
 }
-static void delete_window (Window *window) {
+static void delete_window (App *window) {
 	eglDestroySurface (egl_display, window->egl_surface);
 	wl_egl_window_destroy (window->egl_window);
 	wl_shell_surface_destroy (window->shell_surface);
 	wl_surface_destroy (window->surface);
 	eglDestroyContext (egl_display, window->egl_context);
 }
-static void draw_window (Window *window) {
+static void draw_window (App *window) {
 	glClearColor (0.0, 1.0, 0.0, 1.0);
 	glClear (GL_COLOR_BUFFER_BIT);
 	eglSwapBuffers (egl_display, window->egl_surface);
@@ -94,7 +94,7 @@ static void draw_window (Window *window) {
 ////////////////////
 
 static void
-on_about_to_finish(GstElement *playbin, Window *d) {
+on_about_to_finish(GstElement *playbin, App *d) {
 	if (d->argv[++d->current_uri] == NULL)
 		d->current_uri = 1;
 
@@ -104,7 +104,7 @@ on_about_to_finish(GstElement *playbin, Window *d) {
 
 static void
 error_cb(GstBus *bus, GstMessage *msg, gpointer user_data) {
-	Window *d = user_data;
+	App *d = user_data;
 	gchar *debug = NULL;
 	GError *err = NULL;
 
@@ -123,7 +123,7 @@ error_cb(GstBus *bus, GstMessage *msg, gpointer user_data) {
 
 static GstBusSyncReply
 bus_sync_handler(GstBus *bus, GstMessage *message, gpointer user_data) {
-	Window *d = user_data;
+	App *d = user_data;
 
 	printf("bussync\n");
 
@@ -173,7 +173,7 @@ bus_sync_handler(GstBus *bus, GstMessage *message, gpointer user_data) {
  * because the "configure-event" is only sent to top-level widgets. */
 static gboolean
 video_widget_draw_cb(gpointer user_data) {
-	Window *d = user_data;
+	App *d = user_data;
 
 	if (d->overlay) {
 		gst_video_overlay_set_render_rectangle(d->overlay, 0,
@@ -198,7 +198,7 @@ int main (int argc, char **argv) {
 	eglInitialize (egl_display, NULL, NULL);
 	
 	//Window window;// = g_slice_new0(window);
-	Window* _window = g_slice_new0(Window);
+	App* _window = g_slice_new0(App);
 	create_window (_window, WIDTH, HEIGHT);
 
 	GstBus *bus;
