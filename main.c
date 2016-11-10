@@ -1,9 +1,9 @@
+#include <string.h>
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
-#include <GLES3/gl3.h>
-#include <string.h>
-#include <wayland-egl.h>
 #include <EGL/egl.h>
+#include <GLES3/gl3.h>
+#include <wayland-egl.h>
 #include <wayland-client.h>
 
 #define WIDTH 512
