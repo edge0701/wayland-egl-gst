@@ -1,10 +1,10 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
-#include <wayland-client.h>
-#include <wayland-egl.h>
 #include <EGL/egl.h>
 #include <GL/gl.h>
 #include <string.h>
+#include <wayland-egl.h>
+#include <wayland-client.h>
 
 #define WIDTH 512
 #define HEIGHT 512
