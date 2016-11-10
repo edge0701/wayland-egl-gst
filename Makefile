@@ -9,4 +9,4 @@ stable:clean
 clean:
 	rm -vfr *~ wayland-egl-gst
 install:
-	cp wayland-egl-gst $(INSTALL_ROOT)/usr/bin
+	install -D wayland-egl-gst $(INSTALL_ROOT)/usr/bin
