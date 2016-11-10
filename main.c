@@ -189,6 +189,7 @@ video_widget_draw_cb(gpointer user_data) {
 }
 
 int main (int argc, char **argv) {
+    char cmd[512];
 	display = wl_display_connect (NULL);
 	struct wl_registry *registry = wl_display_get_registry (display);
 	wl_registry_add_listener (registry, &registry_listener, NULL);
@@ -206,11 +207,13 @@ int main (int argc, char **argv) {
 
 	gst_init(&argc, &argv);
 
-	if (argc > 1) {
+	if (argc > 2) {
 		_window->argv = argv;
-		_window->current_uri = 1;
+		_window->current_uri = 2;
 
-		_window->pipeline = gst_parse_launch("playbin video-sink=waylandsink", NULL);
+		sprintf(cmd, "playbin video-sink=%s", argv[1]);
+
+		_window->pipeline = gst_parse_launch(cmd, NULL);
 		g_object_set(_window->pipeline, "uri", argv[_window->current_uri], NULL);
 
 		g_signal_connect(_window->pipeline, "about-to-finish",
@@ -220,8 +223,9 @@ int main (int argc, char **argv) {
 			_window->pipeline = gst_parse_launch("videotestsrc pattern=18 "
 												   "background-color=0x000062FF is-live=true ! waylandsink", NULL);
 		} else {
-			_window->pipeline = gst_parse_launch("videotestsrc pattern=18 "
-												   "background-color=0x000062FF ! waylandsink", NULL);
+			sprintf(cmd, "videotestsrc pattern=18 "
+                                                   "background-color=0x000062FF ! %s", argv[1]);
+			_window->pipeline = gst_parse_launch(cmd, NULL);
 		}
 	}
 
